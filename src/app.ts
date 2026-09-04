@@ -3,9 +3,12 @@ import express from "express";
 import helmet from "helmet";
 
 import { env } from "./config/env.js";
+
 import { apiRateLimiter } from "./middlewares/rateLimit.middleware.js";
 import requestId from "./middlewares/requestId.middleware.js";
 import requestLogger from "./middlewares/requestLogger.middleware.js";
+import notFoundMiddleware from "./middlewares/notFound.middleware.js";
+import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -50,5 +53,13 @@ app.use(
     limit: "1mb",
   }),
 );
+
+// ---------- | 404 Handler | ----------
+
+app.use(notFoundMiddleware);
+
+// ---------- | Global Error Handler | ----------
+
+app.use(errorMiddleware);
 
 export default app;
