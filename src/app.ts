@@ -3,12 +3,12 @@ import express from "express";
 import helmet from "helmet";
 
 import { env } from "./config/env.js";
-
 import { apiRateLimiter } from "./middlewares/rateLimit.middleware.js";
 import requestId from "./middlewares/requestId.middleware.js";
 import requestLogger from "./middlewares/requestLogger.middleware.js";
 import notFoundMiddleware from "./middlewares/notFound.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
+import { apiRouter } from "./routes/index.js";
 
 const app = express();
 
@@ -53,6 +53,10 @@ app.use(
     limit: "1mb",
   }),
 );
+
+// ---------- | API Routes | ----------
+
+app.use(env.apiPrefix, apiRouter);
 
 // ---------- | 404 Handler | ----------
 
