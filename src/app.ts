@@ -3,7 +3,9 @@ import express from "express";
 import helmet from "helmet";
 
 import { env } from "./config/env.js";
-import { apiRateLimiter } from "./middlewares/rate-limit.middleware.js";
+import { apiRateLimiter } from "./middlewares/rateLimit.middleware.js";
+import requestId from "./middlewares/requestId.middleware.js";
+import requestLogger from "./middlewares/requestLogger.middleware.js";
 
 const app = express();
 
@@ -27,6 +29,12 @@ app.use(
 );
 
 app.use(apiRateLimiter);
+
+// ---------- | Request Tracking | ----------
+
+app.use(requestId);
+
+app.use(requestLogger);
 
 // ---------- | Request Parsing | ----------
 

@@ -23,30 +23,28 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().min(1, "CORS_ORIGIN is required"),
 
   LOG_LEVEL: z.enum(["error", "warn", "info", "http", "verbose", "debug", "silly"]).default("info"),
+
+  LOG_RESPONSE_BODY: z
+    .string()
+    .transform((value) => value.toLowerCase() === "true")
+    .default(true),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
 
 if (!parsedEnv.success) {
   console.error("Invalid environment variables:");
-
   console.error(z.prettifyError(parsedEnv.error));
-
   process.exit(1);
 }
 
 export const env = {
   nodeEnv: parsedEnv.data.NODE_ENV,
-
   port: parsedEnv.data.PORT,
-
   apiPrefix: parsedEnv.data.API_PREFIX,
-
   apiVersion: parsedEnv.data.API_VERSION,
-
   mongodbUri: parsedEnv.data.MONGODB_URI,
-
   corsOrigin: parsedEnv.data.CORS_ORIGIN,
-
   logLevel: parsedEnv.data.LOG_LEVEL,
+  logResponseBody: parsedEnv.data.LOG_RESPONSE_BODY,
 } as const;
