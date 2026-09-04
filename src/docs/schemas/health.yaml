@@ -1,0 +1,73 @@
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - environment
+        - uptime
+        - timestamp
+        - database
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+          example: healthy
+
+        environment:
+          type: string
+          example: development
+
+        uptime:
+          type: number
+          format: double
+          example: 124.52
+
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-09-04T18:30:00.000Z"
+
+        database:
+          type: object
+          required:
+            - status
+          properties:
+            status:
+              type: string
+              enum:
+                - connected
+                - disconnected
+                - connecting
+                - disconnecting
+              example: connected
+
+    HealthResponse:
+      type: object
+      required:
+        - statusCode
+        - success
+        - data
+        - message
+        - meta
+      properties:
+        statusCode:
+          type: integer
+          example: 200
+
+        success:
+          type: boolean
+          example: true
+
+        data:
+          $ref: "#/components/schemas/HealthStatus"
+
+        message:
+          type: string
+          example: "Captain's Thread API is healthy."
+
+        meta:
+          nullable: true
+          example: null
