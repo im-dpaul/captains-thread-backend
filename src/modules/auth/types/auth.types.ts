@@ -1,5 +1,7 @@
 import type { Types } from "mongoose";
 
+import type { PublicUser } from "../../users/helpers/user.mapper.js";
+
 // ---------- | Register User Input | ----------
 
 export interface RegisterUserInput {
@@ -36,38 +38,10 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
-// ---------- | Authenticated User | ----------
-
-export interface AuthenticatedUser {
-  id: string;
-
-  firstName: string;
-
-  lastName: string | null;
-
-  email: string;
-
-  phone: string | null;
-
-  avatar: string | null;
-
-  status: string;
-
-  emailVerified: boolean;
-
-  phoneVerified: boolean;
-
-  lastLoginAt: Date | null;
-
-  createdAt: Date;
-
-  updatedAt: Date;
-}
-
 // ---------- | Authentication Result | ----------
 
 export interface AuthenticationResult {
-  user: AuthenticatedUser;
+  user: PublicUser;
 
   tokens: AuthTokens;
 }

@@ -3,9 +3,11 @@ import { Types } from "mongoose";
 import { env } from "../../config/env.js";
 
 import { comparePassword, hashPassword } from "./helpers/password.helper.js";
-import { generateAccessToken, generateRefreshToken } from "./helpers/token.helper.js";
 import { hashRefreshToken } from "./helpers/refresh-token.helper.js";
+import { generateAccessToken, generateRefreshToken } from "./helpers/token.helper.js";
+import mapUserToPublic from "../users/helpers/user.mapper.js";
 
+import { createSession } from "../users/repositories/user-session.repository.js";
 import {
   createUser,
   findUserByEmail,
@@ -13,32 +15,32 @@ import {
   findUserByPhone,
   updateLastLogin,
 } from "../users/repositories/user.repository.js";
-import { createSession } from "../users/repositories/user-session.repository.js";
 
 import type {
   AuthenticationResult,
-  AuthenticatedUser,
   LoginUserInput,
   RegisterUserInput,
 } from "./types/auth.types.js";
-import type { IUser } from "../users/types/user.types.js";
 
-// ---------- | Register User | ----------
+import ApiError from "../../utils/ApiError.js";
+import { HTTP_STATUS } from "../../constants/http.constants.js";
 
-const register = async (input: RegisterUserInput): Promise<AuthenticatedUser> => {
+// ---------- | Register | ----------
+
+const register = async (input: RegisterUserInput) => {
   const email = input.email.toLowerCase().trim();
 
   const existingEmailUser = await findUserByEmail(email);
 
   if (existingEmailUser) {
-    throw new Error("An account with this email already exists.");
+    throw new ApiError(HTTP_STATUS.CONFLICT, "An account with this email already exists.");
   }
 
   if (input.phone) {
     const existingPhoneUser = await findUserByPhone(input.phone);
 
     if (existingPhoneUser) {
-      throw new Error("An account with this phone number already exists.");
+      throw new ApiError(HTTP_STATUS.CONFLICT, "An account with this phone number already exists.");
     }
   }
 
@@ -58,10 +60,10 @@ const register = async (input: RegisterUserInput): Promise<AuthenticatedUser> =>
     deletedAt: null,
   });
 
-  return mapUser(user);
+  return mapUserToPublic(user);
 };
 
-// ---------- | Login User | ----------
+// ---------- | Login | ----------
 
 const login = async (input: LoginUserInput): Promise<AuthenticationResult> => {
   const email = input.email.toLowerCase().trim();
@@ -69,17 +71,17 @@ const login = async (input: LoginUserInput): Promise<AuthenticationResult> => {
   const user = await findUserByEmailWithPassword(email);
 
   if (!user) {
-    throw new Error("Invalid email or password.");
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, "Invalid email or password.");
   }
 
   if (user.status !== "ACTIVE") {
-    throw new Error("Your account is not active.");
+    throw new ApiError(HTTP_STATUS.FORBIDDEN, "Your account is not active.");
   }
 
   const isPasswordValid = await comparePassword(input.password, user.password);
 
   if (!isPasswordValid) {
-    throw new Error("Invalid email or password.");
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, "Invalid email or password.");
   }
 
   const sessionId = new Types.ObjectId();
@@ -106,31 +108,12 @@ const login = async (input: LoginUserInput): Promise<AuthenticationResult> => {
   const updatedUser = await updateLastLogin(user._id);
 
   return {
-    user: mapUser(updatedUser ?? user),
+    user: mapUserToPublic(updatedUser ?? user),
 
     tokens: {
       accessToken,
       refreshToken,
     },
-  };
-};
-
-// ---------- | Map User | ----------
-
-const mapUser = (user: IUser): AuthenticatedUser => {
-  return {
-    id: user._id.toString(),
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    phone: user.phone,
-    avatar: user.avatar ? user.avatar.toString() : null,
-    status: user.status,
-    emailVerified: user.emailVerified,
-    phoneVerified: user.phoneVerified,
-    lastLoginAt: user.lastLoginAt,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
   };
 };
 
