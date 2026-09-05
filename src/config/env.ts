@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import type { StringValue } from "ms";
 import { z } from "zod";
 
 dotenv.config();
@@ -58,7 +59,7 @@ export const env = {
   logLevel: parsedEnv.data.LOG_LEVEL,
   logResponseBody: parsedEnv.data.LOG_RESPONSE_BODY,
   accessTokenSecret: parsedEnv.data.ACCESS_TOKEN_SECRET,
-  accessTokenExpiration: parsedEnv.data.ACCESS_TOKEN_EXPIRATION,
   refreshTokenSecret: parsedEnv.data.REFRESH_TOKEN_SECRET,
-  refreshTokenExpiration: parsedEnv.data.REFRESH_TOKEN_EXPIRATION,
+  accessTokenExpiration: parsedEnv.data.ACCESS_TOKEN_EXPIRATION as StringValue,
+  refreshTokenExpiration: parsedEnv.data.REFRESH_TOKEN_EXPIRATION as StringValue,
 } as const;

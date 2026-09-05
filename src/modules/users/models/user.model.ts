@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
 
-import type { IUser, UserStatus } from "./user.types.js";
-import { AUTH_CONSTANTS } from "../auth/auth.constants.js";
+import type { IUser, UserStatus } from "../types/user.types.js";
+import { AUTH_CONSTANTS } from "../../auth/auth.constants.js";
 
 // ---------- | User Schema | ----------
 
