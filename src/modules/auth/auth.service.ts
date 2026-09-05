@@ -3,11 +3,19 @@ import { Types } from "mongoose";
 import { env } from "../../config/env.js";
 
 import { comparePassword, hashPassword } from "./helpers/password.helper.js";
-import { hashRefreshToken } from "./helpers/refresh-token.helper.js";
-import { generateAccessToken, generateRefreshToken } from "./helpers/token.helper.js";
+import { hashRefreshToken, compareRefreshToken } from "./helpers/refresh-token.helper.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "./helpers/token.helper.js";
 import mapUserToPublic from "../users/helpers/user.mapper.js";
 
-import { createSession } from "../users/repositories/user-session.repository.js";
+import {
+  createSession,
+  findSessionById,
+  revokeSession,
+} from "../users/repositories/user-session.repository.js";
 import {
   createUser,
   findUserByEmail,
@@ -19,6 +27,7 @@ import {
 import type {
   AuthenticationResult,
   LoginUserInput,
+  LogoutUserInput,
   RegisterUserInput,
 } from "./types/auth.types.js";
 
@@ -117,6 +126,38 @@ const login = async (input: LoginUserInput): Promise<AuthenticationResult> => {
   };
 };
 
+// ---------- | Logout | ----------
+
+const logout = async (input: LogoutUserInput): Promise<void> => {
+  const payload = verifyRefreshToken(input.refreshToken);
+
+  const session = await findSessionById(payload.sessionId);
+
+  if (!session) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, "Invalid refresh token.");
+  }
+
+  if (session.userId.toString() !== payload.userId) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, "Invalid refresh token.");
+  }
+
+  if (session.revokedAt) {
+    return;
+  }
+
+  if (session.expiresAt.getTime() <= Date.now()) {
+    return;
+  }
+
+  const isTokenValid = compareRefreshToken(input.refreshToken, session.refreshTokenHash);
+
+  if (!isTokenValid) {
+    throw new ApiError(HTTP_STATUS.UNAUTHORIZED, "Invalid refresh token.");
+  }
+
+  await revokeSession(session._id);
+};
+
 // ---------- | Refresh Token Expiration | ----------
 
 const getRefreshTokenExpirationDate = (): Date => {
@@ -146,4 +187,5 @@ const getRefreshTokenExpirationDate = (): Date => {
 export default {
   login,
   register,
+  logout,
 };

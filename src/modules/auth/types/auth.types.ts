@@ -30,6 +30,11 @@ export interface LoginUserInput {
   deviceName?: string;
 }
 
+// ---------- | Logout User Input | ----------
+export interface LogoutUserInput {
+  refreshToken: string;
+}
+
 // ---------- | Authentication Tokens | ----------
 
 export interface AuthTokens {

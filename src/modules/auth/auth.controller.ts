@@ -22,6 +22,14 @@ const login = async (req: Request, res: Response): Promise<void> => {
   res.status(HTTP_STATUS.OK).json(new ApiResponse(HTTP_STATUS.OK, result, "Login successful."));
 };
 
+// ---------- | Logout | ----------
+
+const logout = async (req: Request, res: Response): Promise<void> => {
+  await authService.logout(req.body);
+
+  res.status(HTTP_STATUS.OK).json(new ApiResponse(HTTP_STATUS.OK, null, "Logout successful."));
+};
+
 // ---------- | Exports | ----------
 
-export { login, register };
+export { login, register, logout };
