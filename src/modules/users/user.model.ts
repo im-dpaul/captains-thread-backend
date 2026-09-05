@@ -1,7 +1,7 @@
-import bcrypt from "bcrypt";
 import { model, Schema } from "mongoose";
 
 import type { IUser, UserStatus } from "./user.types.js";
+import { AUTH_CONSTANTS } from "../auth/auth.constants.js";
 
 // ---------- | User Schema | ----------
 
@@ -55,7 +55,14 @@ const userSchema = new Schema<IUser>(
     password: {
       type: String,
       required: [true, "Password is required."],
-      minlength: [6, "Password must be at least 6 characters."],
+      minlength: [
+        AUTH_CONSTANTS.PASSWORD.MIN_LENGTH,
+        `Password must be at least ${AUTH_CONSTANTS.PASSWORD.MIN_LENGTH} characters.`,
+      ],
+      maxlength: [
+        AUTH_CONSTANTS.PASSWORD.MAX_LENGTH,
+        `Password cannot exceed ${AUTH_CONSTANTS.PASSWORD.MAX_LENGTH} characters.`,
+      ],
       select: false,
     },
 
@@ -96,26 +103,8 @@ const userSchema = new Schema<IUser>(
   },
   {
     timestamps: true,
-    versionKey: false,
-    methods: {
-      comparePassword: async function (candidatePassword: string): Promise<boolean> {
-        return bcrypt.compare(candidatePassword, this.password);
-      },
-    },
   },
 );
-
-// ---------- | Password Hashing | ----------
-
-userSchema.pre("save", async function () {
-  if (!this.isModified("password")) {
-    return;
-  }
-
-  const salt = await bcrypt.genSalt(10);
-
-  this.password = await bcrypt.hash(this.password, salt);
-});
 
 // ---------- | User Model | ----------
 

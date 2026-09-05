@@ -28,6 +28,16 @@ const envSchema = z.object({
     .string()
     .transform((value) => value.toLowerCase() === "true")
     .default(true),
+
+  // ---------- | Authentication | ----------
+
+  ACCESS_TOKEN_SECRET: z.string().min(32, "ACCESS_TOKEN_SECRET must be at least 32 characters."),
+
+  ACCESS_TOKEN_EXPIRATION: z.string().min(1, "ACCESS_TOKEN_EXPIRATION is required."),
+
+  REFRESH_TOKEN_SECRET: z.string().min(32, "REFRESH_TOKEN_SECRET must be at least 32 characters."),
+
+  REFRESH_TOKEN_EXPIRATION: z.string().min(1, "REFRESH_TOKEN_EXPIRATION is required."),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -47,4 +57,8 @@ export const env = {
   corsOrigin: parsedEnv.data.CORS_ORIGIN,
   logLevel: parsedEnv.data.LOG_LEVEL,
   logResponseBody: parsedEnv.data.LOG_RESPONSE_BODY,
+  accessTokenSecret: parsedEnv.data.ACCESS_TOKEN_SECRET,
+  accessTokenExpiration: parsedEnv.data.ACCESS_TOKEN_EXPIRATION,
+  refreshTokenSecret: parsedEnv.data.REFRESH_TOKEN_SECRET,
+  refreshTokenExpiration: parsedEnv.data.REFRESH_TOKEN_EXPIRATION,
 } as const;

@@ -1,4 +1,4 @@
-import type { HydratedDocument, Types } from "mongoose";
+import type { Types } from "mongoose";
 
 // ---------- | User Status | ----------
 
@@ -35,7 +35,3 @@ export interface IUser {
 
   deletedAt: Date | null;
 }
-
-// ---------- | User Document | ----------
-
-export type UserDocument = HydratedDocument<IUser>;
